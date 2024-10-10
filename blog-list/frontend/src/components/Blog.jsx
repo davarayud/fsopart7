@@ -10,8 +10,8 @@ const Blog = ({ blog, addLike, deleteBlog, user }) => {
   }
 
   return (
-    <div className="blog">
-      <div className="short-info">
+    <div className='blog'>
+      <div className='short-info'>
         <span>
           {blog.title} {blog.author}{' '}
         </span>
@@ -27,7 +27,7 @@ const Blog = ({ blog, addLike, deleteBlog, user }) => {
             <br />
             {blog.user.name}
             <br />
-            <div style={showDelete} className="delete">
+            <div style={showDelete} className='delete'>
               <button onClick={() => deleteBlog(blog)}>delete</button>
             </div>{' '}
           </>

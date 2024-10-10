@@ -5,7 +5,6 @@ const Blog = require('../models/blog')
 const User = require('../models/user')
 const helper = require('./test_helper')
 
-
 beforeEach(async () => {
   await Blog.deleteMany({})
   const blogObjects = helper.initialBlog.map(blog => new Blog(blog))
@@ -41,7 +40,6 @@ describe('when there is initially some blogs saved', () => {
 })
 
 describe('viewing a specific note', () => {
-
   test('succeeds with a valid id', async () => {
     const blogsAtStart = await helper.blogsInDb()
     const blogToView = blogsAtStart[0]
@@ -58,17 +56,13 @@ describe('viewing a specific note', () => {
   test('fails with statuscode 404 if note does not exist', async () => {
     const validNonExistingId = await helper.nonExistingId()
 
-    await api
-      .get(`/api/blogs/${validNonExistingId}`)
-      .expect(404)
+    await api.get(`/api/blogs/${validNonExistingId}`).expect(404)
   })
 
   test('fails with statuscode 400 id is invalid', async () => {
     const invalidId = '5a3d5da59070081a82a3445'
 
-    await api
-      .get(`/api/blogs/${invalidId}`)
-      .expect(400)
+    await api.get(`/api/blogs/${invalidId}`).expect(400)
   })
 })
 
@@ -78,12 +72,10 @@ describe('addition of a new blog', () => {
       title: 'Motos Argentinas',
       author: 'Pedro Varela',
       url: 'https://motosargentinasnews.blogspot.com/',
-      likes: 6
+      likes: 6,
     }
 
-    const login = await api
-      .post('/api/login')
-      .send(helper.userPass)
+    const login = await api.post('/api/login').send(helper.userPass)
     const token = login.body.token
 
     await api
@@ -107,9 +99,7 @@ describe('addition of a new blog', () => {
       url: 'https://motosargentinasnews.blogspot.com/',
     }
 
-    const login = await api
-      .post('/api/login')
-      .send(helper.userPass)
+    const login = await api.post('/api/login').send(helper.userPass)
     const token = login.body.token
 
     await api
@@ -127,14 +117,12 @@ describe('addition of a new blog', () => {
   })
 
   test('add blog without title and url, returns error 400 Bad Request', async () => {
-    const  newBlog = {
+    const newBlog = {
       author: 'Pedro Varela',
-      likes: 6
+      likes: 6,
     }
 
-    const login = await api
-      .post('/api/login')
-      .send(helper.userPass)
+    const login = await api.post('/api/login').send(helper.userPass)
     const token = login.body.token
 
     await api
@@ -152,13 +140,10 @@ describe('addition of a new blog', () => {
       title: 'Motos Argentinas',
       author: 'Pedro Varela',
       url: 'https://motosargentinasnews.blogspot.com/',
-      likes: 6
+      likes: 6,
     }
 
-    await api
-      .post('/api/blogs')
-      .send(newBlog)
-      .expect(401)
+    await api.post('/api/blogs').send(newBlog).expect(401)
 
     const blogsAtEnd = await helper.blogsInDb()
     expect(blogsAtEnd).toHaveLength(helper.initialBlog.length)
@@ -170,9 +155,7 @@ describe('deletion of a blog', () => {
     const blogsAtStart = await helper.blogsInDb()
     const blogToDelete = blogsAtStart[0]
 
-    const login = await api
-      .post('/api/login')
-      .send(helper.userPass)
+    const login = await api.post('/api/login').send(helper.userPass)
     const token = login.body.token
 
     await api
@@ -183,7 +166,7 @@ describe('deletion of a blog', () => {
     const blogsAtEnd = await helper.blogsInDb()
     const titles = blogsAtEnd.map(r => r.title)
     const user = await User.findOne({ username: login.body.username })
-    const userblogs = user.blogs.map( r => r.toString())
+    const userblogs = user.blogs.map(r => r.toString())
 
     expect(blogsAtEnd).toHaveLength(helper.initialBlog.length - 1)
     expect(titles).not.toContain(blogToDelete.title)
@@ -193,9 +176,7 @@ describe('deletion of a blog', () => {
     const blogsAtStart = await helper.blogsInDb()
     const blogToDelete = blogsAtStart[0]
 
-    await api
-      .delete(`/api/blogs/${blogToDelete.id}`)
-      .expect(401)
+    await api.delete(`/api/blogs/${blogToDelete.id}`).expect(401)
 
     const blogsAtEnd = await helper.blogsInDb()
     expect(blogsAtEnd).toHaveLength(helper.initialBlog.length)
@@ -210,7 +191,7 @@ describe('update a blog', () => {
       title: 'Motos Argentinas',
       author: 'Pedro Varela',
       url: 'https://motosargentinasnews.blogspot.com/',
-      likes: 6
+      likes: 6,
     }
 
     await api
@@ -232,13 +213,10 @@ describe('update a blog', () => {
       title: 'Motos Argentinas',
       author: 'Pedro Varela',
       url: 'https://motosargentinasnews.blogspot.com/',
-      likes: 6
+      likes: 6,
     }
 
-    await api
-      .put(`/api/blogs/${validNonExistingId}`)
-      .send(blogToUp)
-      .expect(400)
+    await api.put(`/api/blogs/${validNonExistingId}`).send(blogToUp).expect(400)
   })
 
   test('fails with statuscode 400 if blog does not exist', async () => {
@@ -247,21 +225,16 @@ describe('update a blog', () => {
       title: 'Motos Argentinas',
       author: 'Pedro Varela',
       url: 'https://motosargentinasnews.blogspot.com/',
-      likes: 6
+      likes: 6,
     }
 
-    await api
-      .put(`/api/blogs/${validNonExistingId}`)
-      .send(blogToUp)
-      .expect(400)
+    await api.put(`/api/blogs/${validNonExistingId}`).send(blogToUp).expect(400)
   })
 
   test('fails with statuscode 400 id is invalid', async () => {
     const invalidId = '5a3d5da59070081a82a3445'
 
-    await api
-      .put(`/api/blogs/${invalidId}`)
-      .expect(400)
+    await api.put(`/api/blogs/${invalidId}`).expect(400)
   })
 })
 

@@ -39,7 +39,7 @@ describe('addition of a new user', () => {
     const newUser = {
       username: 'nuevousuario',
       name: 'nuevonombre',
-      password: 'contrase;a'
+      password: 'contrase;a',
     }
 
     await api
@@ -58,15 +58,14 @@ describe('addition of a new user', () => {
   test('add user without username, returns error 400 Bad Request', async () => {
     const newUser = {
       name: 'nuevonombre',
-      password: 'contrase;a'
+      password: 'contrase;a',
     }
 
-    const res = await api
-      .post('/api/users')
-      .send(newUser)
-      .expect(400)
+    const res = await api.post('/api/users').send(newUser).expect(400)
 
-    expect(res.body.error).toBe('User validation failed: username: Path `username` is required.')
+    expect(res.body.error).toBe(
+      'User validation failed: username: Path `username` is required.',
+    )
     const usersAtEnd = await helper.usersInDb()
 
     expect(usersAtEnd).toHaveLength(helper.initialUser.length)
@@ -77,10 +76,7 @@ describe('addition of a new user', () => {
       name: 'nuevonombre',
     }
 
-    const res = await api
-      .post('/api/users')
-      .send(newUser)
-      .expect(400)
+    const res = await api.post('/api/users').send(newUser).expect(400)
 
     expect(res.body.error).toBe('password missing')
     const usersAtEnd = await helper.usersInDb()
@@ -91,15 +87,14 @@ describe('addition of a new user', () => {
     const newUser = {
       username: 'nu',
       name: 'nuevonombre',
-      password: 'contrase;a'
+      password: 'contrase;a',
     }
 
-    const res = await api
-      .post('/api/users')
-      .send(newUser)
-      .expect(400)
+    const res = await api.post('/api/users').send(newUser).expect(400)
 
-    expect(res.body.error).toBe('User validation failed: username: Path `username` (`nu`) is shorter than the minimum allowed length (3).')
+    expect(res.body.error).toBe(
+      'User validation failed: username: Path `username` (`nu`) is shorter than the minimum allowed length (3).',
+    )
     const usersAtEnd = await helper.usersInDb()
 
     expect(usersAtEnd).toHaveLength(helper.initialUser.length)
@@ -108,15 +103,14 @@ describe('addition of a new user', () => {
     const newUser = {
       username: 'nuevousuario',
       name: 'nuevonombre',
-      password: 'co'
+      password: 'co',
     }
 
-    const res = await api
-      .post('/api/users')
-      .send(newUser)
-      .expect(400)
+    const res = await api.post('/api/users').send(newUser).expect(400)
 
-    expect(res.body.error).toBe('User validation failed: password: Path password (co) is shorter than the minimum allowed length (3)')
+    expect(res.body.error).toBe(
+      'User validation failed: password: Path password (co) is shorter than the minimum allowed length (3)',
+    )
     const usersAtEnd = await helper.usersInDb()
 
     expect(usersAtEnd).toHaveLength(helper.initialUser.length)

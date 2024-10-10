@@ -34,11 +34,15 @@ const errorHandler = (error, request, response, next) => {
     return response.status(400).json({ error: error.message })
   } else if (error.name === 'MongoServerError') {
     return response.status(400).json({ error: error.message })
-  }
-  else if (error.name ===  'JsonWebTokenError') {
+  } else if (error.name === 'JsonWebTokenError') {
     return response.status(401).json({ error: error.message })
   }
   next(error)
 }
 
-module.exports = { unknownEndpoint, errorHandler, tokenExtractor, userExtractor }
+module.exports = {
+  unknownEndpoint,
+  errorHandler,
+  tokenExtractor,
+  userExtractor,
+}

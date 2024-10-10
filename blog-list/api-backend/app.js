@@ -10,14 +10,14 @@ const mongoose = require('mongoose')
 const middleware = require('./utils/middleware')
 const loginRouter = require('./controllers/login')
 
-mongoose.connect(config.MONGODB_URI)
+mongoose
+  .connect(config.MONGODB_URI)
   .then(() => {
     logger.info('connected to MongoDB')
   })
-  .catch((error) => {
+  .catch(error => {
     logger.error('error connecting to MongoDB:', error.message)
   })
-
 
 app.use(cors())
 app.use(express.json())

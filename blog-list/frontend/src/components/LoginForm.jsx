@@ -5,7 +5,7 @@ const LoginForm = ({ logger }) => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
-  const handleLogin = (event) => {
+  const handleLogin = event => {
     event.preventDefault()
     const userObj = { username, password }
     logger(userObj)
@@ -15,14 +15,14 @@ const LoginForm = ({ logger }) => {
 
   return (
     <>
-      <form onSubmit={handleLogin} aria-label="Login">
+      <form onSubmit={handleLogin} aria-label='Login'>
         <div>
           <label>
             Username:{' '}
             <input
-              type="text"
+              type='text'
               value={username}
-              name="Username"
+              name='Username'
               onChange={({ target }) => setUsername(target.value)}
             />
           </label>
@@ -31,14 +31,14 @@ const LoginForm = ({ logger }) => {
           <label>
             Password:{' '}
             <input
-              type="password"
+              type='password'
               value={password}
-              name="Password"
+              name='Password'
               onChange={({ target }) => setPassword(target.value)}
             />
           </label>
         </div>
-        <button type="submit">Login</button>
+        <button type='submit'>Login</button>
       </form>
     </>
   )

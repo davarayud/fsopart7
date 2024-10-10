@@ -31,14 +31,14 @@ const App = () => {
     }
   }, [])
 
-  const setNotifObjet = (notif) => {
+  const setNotifObjet = notif => {
     setNotifMessege(notif)
     setTimeout(() => {
       setNotifMessege([null, ''])
     }, 5000)
   }
 
-  const logger = async (userObj) => {
+  const logger = async userObj => {
     try {
       const userLog = await loginService.login(userObj)
       window.localStorage.setItem('loggedBlogappUser', JSON.stringify(userLog))
@@ -54,7 +54,7 @@ const App = () => {
     }
   }
 
-  const handleLogout = (event) => {
+  const handleLogout = event => {
     event.preventDefault()
     window.localStorage.removeItem('loggedBlogappUser')
     setNotifObjet([`Goodbye ${user.name} come back soon.`, 'good'])
@@ -62,7 +62,7 @@ const App = () => {
     blogService.setToken(null)
   }
 
-  const addBlog = async (objectBlog) => {
+  const addBlog = async objectBlog => {
     try {
       const response = await blogService.createBlog(objectBlog)
       setBlogs(blogs.concat(response))
@@ -76,7 +76,7 @@ const App = () => {
     }
   }
 
-  const addLike = async (blog) => {
+  const addLike = async blog => {
     const blogToUp = {
       user: blog.user.id,
       likes: blog.likes + 1,
@@ -86,8 +86,8 @@ const App = () => {
     }
     try {
       const response = await blogService.update(blog.id, blogToUp)
-      const blogAdded = blogs.map((blogInList) =>
-        blogInList.id !== blog.id ? blogInList : response
+      const blogAdded = blogs.map(blogInList =>
+        blogInList.id !== blog.id ? blogInList : response,
       )
       const orderBlogs = blogAdded.sort((a, b) => (a.likes > b.likes ? -1 : 1))
       setBlogs(orderBlogs)
@@ -96,14 +96,14 @@ const App = () => {
     }
   }
 
-  const deleteBlog = async (blogToDelete) => {
+  const deleteBlog = async blogToDelete => {
     if (
       window.confirm(
-        `Remove blog ${blogToDelete.title} by ${blogToDelete.author}`
+        `Remove blog ${blogToDelete.title} by ${blogToDelete.author}`,
       )
     ) {
       await blogService.deleteBlog(blogToDelete.id)
-      setBlogs(blogs.filter((blog) => blog.id !== blogToDelete.id))
+      setBlogs(blogs.filter(blog => blog.id !== blogToDelete.id))
       setNotifObjet([`The blog ${blogToDelete.title} has been delete`, 'good'])
     }
   }
@@ -126,10 +126,10 @@ const App = () => {
         {user.name} logged in <button onClick={handleLogout}>Logout</button>{' '}
       </p>
       <Notification notifObjet={notifMessage} />
-      <Togglable buttonLabel="New blog" ref={refCreateBlog}>
+      <Togglable buttonLabel='New blog' ref={refCreateBlog}>
         <BlogForm addBlog={addBlog} />
       </Togglable>
-      {blogs.map((blog) => (
+      {blogs.map(blog => (
         <Blog
           key={blog.id}
           blog={blog}
@@ -138,8 +138,7 @@ const App = () => {
           deleteBlog={deleteBlog}
         />
       ))}
-      { blogs.length === 0 &&
-      <h3>Here will be shown the added blogs</h3>}
+      {blogs.length === 0 && <h3>Here will be shown the added blogs</h3>}
     </div>
   )
 }

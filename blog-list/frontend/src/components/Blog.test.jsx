@@ -12,19 +12,24 @@ describe('<Blog/>', () => {
     user: { username: 'nombre de usuario' },
   }
   let addLike
-  const deleteBlog = (blog) => {}
+  const deleteBlog = blog => {}
   const user = { username: 'nombre de usuario' }
 
   beforeEach(() => {
     addLike = vi.fn()
     container = render(
-      <Blog blog={blog} user={user} addLike={addLike} deleteBlog={deleteBlog} />
+      <Blog
+        blog={blog}
+        user={user}
+        addLike={addLike}
+        deleteBlog={deleteBlog}
+      />,
     ).container
   })
 
   test('At startup shows title and author but does not show url and likes', () => {
     const div = container.querySelector('.short-info')
- 
+
     expect(div).toHaveTextContent('titulo del blog')
     expect(div).toHaveTextContent('autor del blog')
 

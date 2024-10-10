@@ -4,9 +4,12 @@ const User = require('../models/user')
 const Blog = require('../models/blog')
 
 usersRouter.get('/', async (req, res) => {
-  const users = await User
-    .find({})
-    .populate('blogs', { title : 1, author: 1, url: 1, id: 1 })
+  const users = await User.find({}).populate('blogs', {
+    title: 1,
+    author: 1,
+    url: 1,
+    id: 1,
+  })
   res.json(users)
 })
 
@@ -15,7 +18,11 @@ usersRouter.post('/', async (req, res) => {
   if (body.password === undefined) {
     return res.status(400).json({ error: 'password missing' })
   } else if (body.password.length < 3) {
-    return res.status(400).json({ error: `User validation failed: password: Path password (${body.password}) is shorter than the minimum allowed length (3)` })
+    return res
+      .status(400)
+      .json({
+        error: `User validation failed: password: Path password (${body.password}) is shorter than the minimum allowed length (3)`,
+      })
   }
   const saltRounds = 10
   const passwordHash = await bcrypt.hash(body.password, saltRounds)
@@ -24,7 +31,7 @@ usersRouter.post('/', async (req, res) => {
     username: body.username,
     name: body.name,
     passwordHash,
-    blogs: []
+    blogs: [],
   })
 
   const savedUser = await user.save()
