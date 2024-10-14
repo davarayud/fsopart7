@@ -7,11 +7,14 @@ import Notification from './components/Notification'
 import './style.css'
 import Togglable from './components/Togglable'
 import LoginForm from './components/LoginForm'
+import { showNotification } from './reducers/notificationReducer'
+import { useDispatch } from 'react-redux'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [user, setUser] = useState(null)
   const [notifMessage, setNotifMessege] = useState([null, ''])
+  const dispatch = useDispatch()
 
   useEffect(() => {
     const setingBlog = async () => {
@@ -31,33 +34,30 @@ const App = () => {
     }
   }, [])
 
-  const setNotifObjet = notif => {
-    setNotifMessege(notif)
-    setTimeout(() => {
-      setNotifMessege([null, ''])
-    }, 5000)
-  }
-
   const logger = async userObj => {
     try {
       const userLog = await loginService.login(userObj)
       window.localStorage.setItem('loggedBlogappUser', JSON.stringify(userLog))
       setUser(userLog)
       blogService.setToken(userLog.token)
-      setNotifObjet([
-        `Hi ${userLog.name}, Welcome to blog application!`,
-        'good',
-      ])
+      dispatch(
+        showNotification(
+          [`Hi ${userLog.name}, Welcome to blog application!`, 'good'],
+          5,
+        ),
+      )
     } catch {
       console.log('Wrong credentials')
-      setNotifObjet(['Wrong username or password', 'error'])
+      dispatch(showNotification(['Wrong username or password', 'error'], 5))
     }
   }
 
   const handleLogout = event => {
     event.preventDefault()
     window.localStorage.removeItem('loggedBlogappUser')
-    setNotifObjet([`Goodbye ${user.name} come back soon.`, 'good'])
+    dispatch(
+      showNotification([`Goodbye ${user.name} come back soon.`, 'good'], 5),
+    )
     setUser(null)
     blogService.setToken(null)
   }
@@ -67,10 +67,12 @@ const App = () => {
       const response = await blogService.createBlog(objectBlog)
       setBlogs(blogs.concat(response))
       refCreateBlog.current.toggleVisibility()
-      setNotifObjet([
-        `A new blog ${response.title} by ${response.author} added.`,
-        'good',
-      ])
+      dispatch(
+        showNotification(
+          [`A new blog ${response.title} by ${response.author} added.`, 'good'],
+          5,
+        ),
+      )
     } catch (error) {
       console.log(error)
     }
@@ -91,6 +93,12 @@ const App = () => {
       )
       const orderBlogs = blogAdded.sort((a, b) => (a.likes > b.likes ? -1 : 1))
       setBlogs(orderBlogs)
+      dispatch(
+        showNotification(
+          [`You liked '${response.title}' by '${response.author}'`, 'good'],
+          5,
+        ),
+      )
     } catch (error) {
       console.log(error)
     }
@@ -104,7 +112,12 @@ const App = () => {
     ) {
       await blogService.deleteBlog(blogToDelete.id)
       setBlogs(blogs.filter(blog => blog.id !== blogToDelete.id))
-      setNotifObjet([`The blog ${blogToDelete.title} has been delete`, 'good'])
+      dispatch(
+        showNotification(
+          [`The blog ${blogToDelete.title} has been delete`, 'good'],
+          5,
+        ),
+      )
     }
   }
 
@@ -114,7 +127,7 @@ const App = () => {
     return (
       <div>
         <h1>Log in to application</h1>
-        <Notification notifObjet={notifMessage} />
+        <Notification />
         <LoginForm logger={logger}></LoginForm>
       </div>
     )
