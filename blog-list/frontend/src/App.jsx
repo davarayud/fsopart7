@@ -7,11 +7,12 @@ import Notification from './components/Notification'
 import './style.css'
 import Togglable from './components/Togglable'
 import LoginForm from './components/LoginForm'
+import { useNotificationDispatch } from './NotificationContext'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [user, setUser] = useState(null)
-  const [notifMessage, setNotifMessege] = useState([null, ''])
+  const notifDispatch = useNotificationDispatch()
 
   useEffect(() => {
     const setingBlog = async () => {
@@ -32,9 +33,12 @@ const App = () => {
   }, [])
 
   const setNotifObjet = notif => {
-    setNotifMessege(notif)
+    notifDispatch({
+      type: 'SET',
+      payload: notif,
+    })
     setTimeout(() => {
-      setNotifMessege([null, ''])
+      notifDispatch({ type: 'DELETE' })
     }, 5000)
   }
 
@@ -114,7 +118,7 @@ const App = () => {
     return (
       <div>
         <h1>Log in to application</h1>
-        <Notification notifObjet={notifMessage} />
+        <Notification />
         <LoginForm logger={logger}></LoginForm>
       </div>
     )
@@ -125,7 +129,7 @@ const App = () => {
       <p>
         {user.name} logged in <button onClick={handleLogout}>Logout</button>{' '}
       </p>
-      <Notification notifObjet={notifMessage} />
+      <Notification />
       <Togglable buttonLabel='New blog' ref={refCreateBlog}>
         <BlogForm addBlog={addBlog} />
       </Togglable>
