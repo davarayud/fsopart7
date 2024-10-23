@@ -1,6 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef, useContext } from 'react'
 import Blog from './components/Blog'
-import blogService from './services/blogs'
 import loginService from './services/login'
 import BlogForm from './components/BlogForm'
 import Notification from './components/Notification'
@@ -8,29 +7,67 @@ import './style.css'
 import Togglable from './components/Togglable'
 import LoginForm from './components/LoginForm'
 import { useNotificationDispatch } from './NotificationContext'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  createBlog,
+  deleteBlog,
+  getBlogs,
+  setToken,
+  updateBlog,
+} from './request'
+import UserContext, { deleteUser, setiUser } from './UserContext'
 
 const App = () => {
-  const [blogs, setBlogs] = useState([])
-  const [user, setUser] = useState(null)
+  const queryClient = useQueryClient()
+  const [user, userDispatch] = useContext(UserContext)
   const notifDispatch = useNotificationDispatch()
-
-  useEffect(() => {
-    const setingBlog = async () => {
-      const blogsInDB = await blogService.getAll()
-      const orderBlogs = blogsInDB.sort((a, b) => (a.likes > b.likes ? -1 : 1))
-      setBlogs(orderBlogs)
-    }
-    setingBlog()
-  }, [])
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJSON) {
       const loggedUser = JSON.parse(loggedUserJSON)
-      setUser(loggedUser)
-      blogService.setToken(loggedUser.token)
+      userDispatch(setiUser(loggedUser))
+      setToken(loggedUser.token)
     }
-  }, [])
+  }, [userDispatch])
+
+  const refCreateBlog = useRef()
+
+  const result = useQuery({
+    queryKey: ['blogs'],
+    queryFn: getBlogs,
+  })
+  const newBlogMutation = useMutation({
+    mutationFn: createBlog,
+    onSuccess: objectBlog => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] })
+      refCreateBlog.current.toggleVisibility()
+      setNotifObjet([
+        `A new blog ${objectBlog.title} by ${objectBlog.author} added.`,
+        'good',
+      ])
+    },
+  })
+  const updateBlogMutation = useMutation({
+    mutationFn: updateBlog,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] })
+    },
+  })
+
+  const deleteBlogMutation = useMutation({
+    mutationFn: deleteBlog,
+    onSuccess: blogToDelete => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] })
+      setNotifObjet([`The blog ${blogToDelete.title} has been delete`, 'good'])
+    },
+  })
+
+  if (result.isLoading) {
+    return <div> loading data... </div>
+  }
+
+  const blogs2 = result.data.sort((a, b) => (a.likes > b.likes ? -1 : 1))
 
   const setNotifObjet = notif => {
     notifDispatch({
@@ -46,8 +83,8 @@ const App = () => {
     try {
       const userLog = await loginService.login(userObj)
       window.localStorage.setItem('loggedBlogappUser', JSON.stringify(userLog))
-      setUser(userLog)
-      blogService.setToken(userLog.token)
+      userDispatch(setiUser(userLog))
+      setToken(userLog.token)
       setNotifObjet([
         `Hi ${userLog.name}, Welcome to blog application!`,
         'good',
@@ -62,57 +99,32 @@ const App = () => {
     event.preventDefault()
     window.localStorage.removeItem('loggedBlogappUser')
     setNotifObjet([`Goodbye ${user.name} come back soon.`, 'good'])
-    setUser(null)
-    blogService.setToken(null)
+    userDispatch(deleteUser())
+    setToken(null)
   }
 
   const addBlog = async objectBlog => {
-    try {
-      const response = await blogService.createBlog(objectBlog)
-      setBlogs(blogs.concat(response))
-      refCreateBlog.current.toggleVisibility()
-      setNotifObjet([
-        `A new blog ${response.title} by ${response.author} added.`,
-        'good',
-      ])
-    } catch (error) {
-      console.log(error)
-    }
+    newBlogMutation.mutate(objectBlog)
   }
 
   const addLike = async blog => {
     const blogToUp = {
+      ...blog,
       user: blog.user.id,
       likes: blog.likes + 1,
-      author: blog.author,
-      title: blog.title,
-      url: blog.url,
     }
-    try {
-      const response = await blogService.update(blog.id, blogToUp)
-      const blogAdded = blogs.map(blogInList =>
-        blogInList.id !== blog.id ? blogInList : response,
-      )
-      const orderBlogs = blogAdded.sort((a, b) => (a.likes > b.likes ? -1 : 1))
-      setBlogs(orderBlogs)
-    } catch (error) {
-      console.log(error)
-    }
+    updateBlogMutation.mutate(blogToUp)
   }
 
-  const deleteBlog = async blogToDelete => {
+  const deleteBlogFn = async blogToDelete => {
     if (
       window.confirm(
         `Remove blog ${blogToDelete.title} by ${blogToDelete.author}`,
       )
     ) {
-      await blogService.deleteBlog(blogToDelete.id)
-      setBlogs(blogs.filter(blog => blog.id !== blogToDelete.id))
-      setNotifObjet([`The blog ${blogToDelete.title} has been delete`, 'good'])
+      deleteBlogMutation.mutate(blogToDelete.id)
     }
   }
-
-  const refCreateBlog = useRef()
 
   if (user === null) {
     return (
@@ -133,16 +145,16 @@ const App = () => {
       <Togglable buttonLabel='New blog' ref={refCreateBlog}>
         <BlogForm addBlog={addBlog} />
       </Togglable>
-      {blogs.map(blog => (
+      {blogs2.map(blog => (
         <Blog
           key={blog.id}
           blog={blog}
           user={user}
           addLike={addLike}
-          deleteBlog={deleteBlog}
+          deleteBlog={deleteBlogFn}
         />
       ))}
-      {blogs.length === 0 && <h3>Here will be shown the added blogs</h3>}
+      {blogs2.length === 0 && <h3>Here will be shown the added blogs</h3>}
     </div>
   )
 }
